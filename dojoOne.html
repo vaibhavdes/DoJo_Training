@@ -1,0 +1,176 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>DoJo V1.6 Training</title>
+    <style>
+      .red {
+        color: red;
+      }
+      .yellow {
+        color: yellow;
+      }
+    </style>
+    <script>
+      //application config - can have global properties
+      var djConfig = {
+        parseOnLoad: true,
+        isDebug: false,
+        debugContainerId: "debugDiv",
+        baseUrl: "dojo-release-1.6.5/dojo/",
+        locale: "en-us"
+      };
+    </script>
+    <script src="dojo-release-1.6.5/dojo/dojo.js"></script>
+
+    <script>
+      dojo.require("dijit.form.Button");
+
+      //working with async function/thread
+      function createDeferred() {
+        var button = dijit.byId("deferredButton");
+        dojo.connect(button, "onClick", function(event) {
+          var deferred = new dojo.Deferred();
+          dojo.byId("response").innerHTML = "Created a deferred.";
+
+          //added timer for callback
+          setTimeout(function() {
+            //execture callback after 1 sec
+            deferred.callback({ called: true });
+          }, 1000);
+
+          //Add a callback that changes the displayed message after it fires.
+          deferred.then(function() {
+            //after callback do this
+            dojo.byId("response").innerHTML = "Deferred has fired.";
+          });
+        });
+      }
+      //Execute above function on Page Load
+      dojo.addOnLoad(createDeferred);
+    </script>
+
+    <script type="text/javascript">
+      var anOldObject = { bar: "baz" };
+      var myObj = {
+        foo: "bar",
+        method: function() {
+          console.log(this.foo);
+        },
+        myData: function(data) {
+          console.log(data);
+          this.data = data;
+        }
+      };
+      //better Version
+      var func = dojo.hitch(myObj, function() {
+        console.log(this.foo);
+      });
+      func();
+      //better Version
+      var func = dojo.hitch(myObj, myObj.method);
+      func();
+      //better Version
+      var func = dojo.hitch(myObj, "method");
+      func();
+      //better Version - with argument
+      var func = dojo.hitch(myObj, "myData", "xyz");
+      func();
+      //xhr JSON
+      dojo.xhrGet({
+        url: "https://jsonplaceholder.typicode.com/todos/1",
+        load: dojo.hitch(myObj, "myData")
+      });
+
+      //Using Delegate
+      var myNewObject = dojo.delegate(anOldObject, { thud: "xyzzy" });
+      myNewObject.bar == "baz"; // delegated to anOldObject
+      anOldObject.bar = "thonks";
+      myNewObject.bar == "thonk"; // still delegated to anOldObject's bar
+      console.log(myNewObject.bar);
+      console.log(myNewObject);
+
+      //Checking
+      console.debug(dojo.isObject(myNewObject));
+      console.debug(dojo.isFunction(func));
+      console.debug(dojo.isArray(anOldObject));
+
+      //String Utility
+      var string = " hello ";
+      console.debug(dojo.trim(string));
+      console.debug(string);
+    </script>
+    <script>
+      dojo.require("dijit.form.TextBox");
+      dojo.require("dijit.form.Button");
+
+      //Working with Form
+      function formToJson() {
+        dojo.connect(dijit.byId("convert"), "onClick", function() {
+          var uri = "http://xyz.com/post/";
+          var query = {
+            foo: ["bar", "bar2"],
+            bit: "byte"
+          };
+          // (Convert Inputs to JSON) - POST
+          var formJson = dojo.formToJson("myform");
+          dojo.byId("formObject").innerHTML = formJson;
+          // (Inputs to Query) - GET
+          var formQuery = dojo.formToQuery("myform");
+          dojo.byId("formObject").innerHTML += "<br>" + formQuery;
+          // (Object to Query)
+          var queryStr = dojo.objectToQuery(query);
+          uri = uri + "?" + queryStr;
+          dojo.byId("formObject").innerHTML += "<br>" + uri;
+        });
+      }
+      dojo.addOnLoad(formToJson);
+
+      //Get Node/Element Properties
+      //var result = dojo.getNodeProp("convert", "type");
+      //console.debug("Properties : " + result);
+    </script>
+  </head>
+
+  <body>
+    <div style="width: 100%; float: left; margin-top: 10px;">
+      <b>Push the button to create a deferred and set up an async callback</b>
+      <br />
+      <button
+        dojoType="dijit.form.Button"
+        id="deferredButton"
+        value="Create deferred!"
+      ></button>
+      <br />
+      <b>Result</b>
+      <div id="response"></div>
+    </div>
+    <br />
+    <hr />
+    <br />
+    <div>
+      <b>The form as JSON/Query:</b>
+      <pre id="formObject"></pre>
+      <form id="myform">
+        <input
+          type="text"
+          dojoType="dijit.form.TextBox"
+          name="first-name"
+          value="xyz"
+        />
+        <input
+          type="text"
+          dojoType="dijit.form.TextBox"
+          name="last-name"
+          value="abc"
+        />
+        <input
+          id="convert"
+          type="button"
+          dojoType="dijit.form.Button"
+          name="submit"
+          value="Submit"
+        />
+      </form>
+    </div>
+  </body>
+</html>

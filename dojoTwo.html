@@ -1,0 +1,190 @@
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>DoJo V1.6 Training</title>
+  <style>
+    .red {
+      color: red;
+    }
+
+    .yellow {
+      color: yellow;
+    }
+  </style>
+  <script>
+    //application config - can have global properties
+    var djConfig = {
+      parseOnLoad: true,
+      isDebug: false,
+      debugContainerId: "debugDiv",
+      baseUrl: "dojo-release-1.6.5/dojo/",
+      locale: "en-us",
+      ioPublish: true
+    };
+  </script>
+  <script src="dojo-release-1.6.5/dojo/dojo.js"></script>
+
+  <script>
+    //Document Lifecycle
+    function textOnConsole() {
+      console.debug("Hello World");
+    }
+
+    //1. When Page and DOM Structure Loads
+    dojo.addOnLoad(textOnConsole);
+    dojo.addOnLoad(function () {
+      document.formOne.id.value = "Hello";
+    });
+
+    //2. When Page Unload (Redirect)
+    var unLoad = function () {
+      // do some unload stuff
+      alert("unloading...");
+    }
+    dojo.addOnUnload(unLoad);
+    dojo.addOnWindowUnload(window, "unLoad");
+  </script>
+
+  <script>
+    //AJAX / IO
+    dojo.subscribe("/dojo/io/start", function (data) {
+      //Triggered when there are no outstanding IO requests,
+      //and a new IO request is started. No arguments are passed with this topic.
+      console.log("I got(Start): ", data);
+    });
+    dojo.subscribe("/dojo/io/send", function (/*dojo.Deferrred*/dfd) {
+      console.log("New IO Request Started");
+    });
+    dojo.subscribe("/dojo/io/load", function (/*dojo.Deferrred*/dfd, /*Object*/response) {
+      console.log("IO Request Loaded Succesfully & here is response(load): ", response);
+    });
+    dojo.subscribe("/dojo/io/error", function (/*dojo.Deferrred*/dfd, /*Object*/response) {
+      console.log("Error in New IO Request Received", response);
+    });
+    dojo.subscribe("/dojo/io/done", function (/*dojo.Deferrred*/dfd, /*Object*/response) {
+      console.log("IO Request Completed", response);
+    });
+    dojo.subscribe("/dojo/io/stop", function () {
+      console.log("All Request Completed");
+    });
+
+    dojo.publish("/dojo/io/start", [{ title: "KGF" }]);
+
+    //First subscribe and then it can be published anytime 
+    dojo.subscribe("zeetv", function (theNews) {
+      var item;
+      for (item in theNews) {
+        console.log(item + ": " + theNews[item]);
+      }
+    });
+    dojo.publish("zeetv", [{
+      item: "kausauti zindagi ki",
+      another: "naggin",
+      yetAnother: "saas bhi kabhi bahu thi"
+    }]);
+  </script>
+
+  <script type="text/javascript">
+
+
+    //XHR Request Handling
+    //Check in Cosole subscribe has detected something   
+    //GET Request
+    dojo.xhrGet({
+      url: "https://jsonplaceholder.typicode.com/todos/1",
+      // here comes the contentHandler:
+      handleAs: "json",
+      load: function (data) {
+        if (data && !data.error) {
+          //do anything and something on data received here
+          //console.debug(data);
+        } else {
+          //handle error
+          //console.debug("error");
+        }
+      }
+    });
+
+
+    //POST Request
+    function sendForm() {
+      var form = dojo.byId("myform")
+      dojo.connect(form, "onsubmit", function (event) {
+        //stop default events, We want to control it
+        dojo.stopEvent(event);
+        //parameters for xhrRequest        
+        var xhrArgs = {
+          url: "dojoTwo",
+          postData: "Some random text",
+          form: dojo.byId("myform"),
+          handleAs: "text",
+          load: function (data) {
+            dojo.byId("response").innerHTML =
+              "Form Submited";
+          },
+          error: function (error) {
+            dojo.byId("response").innerHTML =
+              "Error with Server";
+          }
+        }
+        //Calling Post Asyncronously
+        dojo.byId("response").innerHTML = "Form is been Processed";
+        var deferrred = dojo.xhrPost(xhrArgs);
+      });
+    }
+    dojo.addOnLoad(sendForm);
+
+    /* Remove Comment to see it work
+        //Request Handling with Custom handler
+        //Using Mixin (Merge two objects (join two objects) with similar keys and rest all obj as same)
+        dojo.mixin(dojo.contentHandlers, {
+          "makeUpper": function (xhr) {
+            return xhr.responseText.toUpper();
+          }
+        });
+        //Without Mixin
+        dojo.contentHandlers.wrappedJSON = function (xhr) {
+          // like handleAs:"json", but mixes an additional bit into the response always.
+          var json = dojo.contentHandles.json(xhr);
+          return dojo.mixin(json, { _wrapped_by_app: true });
+        };
+
+
+        //Add Handler name in handleAs
+        dojo.xhrPost({
+          url: "https://jsonplaceholder.typicode.com/todos/2",
+          handleAs: "wrappedJSON",
+          load: function (data) {
+            // data is a CAPS version of the original responseText
+          }
+        });
+    */
+
+
+  </script>
+</head>
+
+<body>
+  <form name="formOne">
+    <input type="text" name="id" placeholder="Enter Something" />
+  </form>
+  <a href="javascript:unLoad()">Unload Example</a>
+  <a href="dojoOne.html">Unload Example (Check Console)</a>
+
+  <hr>
+  <b>Simple Form:</b>
+  <br>
+  <blockquote>
+    <form id="myform">
+      Text: <input type="text" dojoType="dijit.form.TextBox" name="formInput" value="Some text"></input><br><br>
+      Checkbox: <input type="checkbox" dojoType="dijit.form.CheckBox" name="checkboxInput"></input><br><br>
+      <button type="submit" dojoType="dijit.form.Button" id="submitButton">Send it!</button>
+    </form>
+  </blockquote>
+  <br>
+  <b>Result</b>
+  <div id="response"></div>
+</body>
+
+</html>

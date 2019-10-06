@@ -1,0 +1,87 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>DoJo V1.6 Training</title>
+    <style>
+        .red {
+            color: red;
+        }
+
+        .yellow {
+            color: yellow;
+        }
+    </style>
+    <script>
+        //application config - can have global properties
+        var djConfig = {
+            parseOnLoad: true,
+            isDebug: false,
+            debugContainerId: "debugDiv",
+            baseUrl: "dojo-release-1.6.5/dojo/",
+            locale: "en-us",
+            ioPublish: true
+        };
+    </script>
+    <script src="dojo-release-1.6.5/dojo/dojo.js"></script>
+    <script>
+        //dojo.registerModulePath("lib", "../../lib");
+        //dojo.require("lib.person.car");
+
+        //class name is honda
+        //provide in constructor
+        //constructor has statement to process the input (argument)
+        dojo.declare("honda", null, {
+            count: 100,
+            constructor: function (/* Object */args) {
+                dojo.safeMixin(this, args);
+            }
+        });
+        var cars1 = new honda({ model: "wagonR" });
+        var cars2 = new honda();
+        console.log(cars1.model);
+        console.log(cars2.count);
+
+        //making a class local accessible
+        var car = dojo.declare("honda", null, {
+            numbers: [1, 2, 3],
+            name: 'abc',
+            count: 100,
+            constructor: function (/* Multiple arguments can be passed here */args) {
+                dojo.safeMixin(this, args);
+                this.count += 200;
+            },
+            /*  static to be shared by all instances : 'static' is not any special it can be any name*/
+            static: { pi: 3.14 },
+            /* methods to perform operations*/
+            addTwo: function (num) {
+                this.count += num;
+            }
+        });
+        var thing = new car({ count: 200 });
+        console.log(thing.count);
+        thing.addTwo(200);
+        console.log(thing.count);
+
+    </script>
+
+    <script>
+        //misc
+        //set cookies
+        //Format: name,value,properties
+        //dojo.cookie("sessionId", "1234", { expires: 5 });
+
+
+        //working with date
+        //var myDate = new Date(2034, 7, 23);
+        //dojo.date.stamp
+        //dojo.date.locale.parse            Converts a properly formatted string 
+        //dojo.date.locale.format           Formats a Date object as a String
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
